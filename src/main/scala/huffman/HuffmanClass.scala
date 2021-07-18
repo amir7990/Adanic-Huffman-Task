@@ -13,3 +13,7 @@ class HuffmanClass(chars: String) {
     encode(tree)(text.toVector)
 }
 
+object HuffmanClass{
+  def apply(chars: String): HuffmanClass = new HuffmanClass(chars)
+}
+

@@ -4,11 +4,11 @@ class HuffmanSuite extends munit.FunSuite {
   import Huffman._
 
   trait TestTrees1 {
-    val huffman = new HuffmanClass("adddddbbbbcccc")
+    val huffman: HuffmanClass = HuffmanClass("adddddbbbbcccc")
   }
 
   trait TestTrees2 {
-    val huffman = new HuffmanClass("absdfdfdssaa")
+    val huffman: HuffmanClass = HuffmanClass("absdfdfdssaa")
   }
 
   test("First Test"){
