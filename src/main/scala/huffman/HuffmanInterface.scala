@@ -11,8 +11,7 @@ trait HuffmanInterface {
   def until(done: Vector[CodeTree] => Boolean, merge: Vector[CodeTree] => Vector[CodeTree])(trees: Vector[CodeTree]): Vector[CodeTree]
   def createCodeTree(chars: Vector[Char]): CodeTree
   def decode(tree: CodeTree, bits: Vector[Byte]): Vector[Char]
-  def decodedSecret: Vector[Char]
   def encode(tree: CodeTree)(text: Vector[Char]): Vector[Byte]
-  def frenchCode: CodeTree
-  def secret: Vector[Byte]
+
+
 }
