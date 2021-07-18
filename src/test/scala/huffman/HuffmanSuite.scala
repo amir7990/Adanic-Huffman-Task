@@ -2,30 +2,30 @@ package huffman
 
 class HuffmanSuite extends munit.FunSuite {
   import Huffman._
+
   trait TestTrees1 {
-    val huffman = new HuffmanClass("adddddbbbbcccc".toVector)
+    val huffman = new HuffmanClass("adddddbbbbcccc")
   }
 
   trait TestTrees2 {
-    val huffman = new HuffmanClass("absdfdfdssaa".toVector)
+    val huffman = new HuffmanClass("absdfdfdssaa")
   }
 
   test("First Test"){
     new TestTrees1  {
-      assertEquals(huffman.Decode(huffman.Encode("aaabbcd")), "aaabbcd")
+      assertEquals(huffman.mainDecode(huffman.mainEncode("aaabbcd")), "aaabbcd")
     }
   }
 
   test("Second Test"){
     new TestTrees1  {
-      assertEquals(huffman.Decode(huffman.Encode("aaaddbbbbbbbb")), "aaaddbbbbbbbb")
+      assertEquals(huffman.mainDecode(huffman.mainEncode("aaaddbbbbbbbb")), "aaaddbbbbbbbb")
     }
   }
 
-
   test("Third Test"){
     new TestTrees2  {
-      assertEquals(huffman.Encode(huffman.Decode(convertIntToByte(Vector(1,0,1,0,1,0,1,1,1)))), convertIntToByte(Vector(1,0,1,0,1,0,1,1,1)))
+      assertEquals(huffman.mainEncode(huffman.mainDecode(convertIntToByte(Vector(1,0,1,0,1,0,1,1,1)))), convertIntToByte(Vector(1,0,1,0,1,0,1,1,1)))
     }
   }
 
