@@ -4,11 +4,11 @@ class HuffmanSuite extends munit.FunSuite {
   import Huffman._
 
   trait TestTrees1 {
-    val huffman = new HuffmanClass("adddddbbbbcccc")
+    val huffman: HuffmanClass = HuffmanClass("adddddbbbbcccc")
   }
 
   trait TestTrees2 {
-    val huffman = new HuffmanClass("absdfdfdssaa")
+    val huffman: HuffmanClass = HuffmanClass("absdfdfdssaa")
   }
 
   test("First Test"){
@@ -29,10 +29,12 @@ class HuffmanSuite extends munit.FunSuite {
     }
   }
 
-
-
-
-
-
+  test("Fourth"){
+    val string = "Salam Khoubi ?"
+    val huffman = HuffmanClass(string)
+    val encoded = huffman.mainEncode(string)
+    val decoded = huffman.mainDecode(encoded)
+    assert(encoded.size >= decoded.length, "tested")
+  }
 
 }
