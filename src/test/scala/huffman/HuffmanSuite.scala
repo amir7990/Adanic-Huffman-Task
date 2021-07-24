@@ -1,7 +1,6 @@
 package huffman
 
 class HuffmanSuite extends munit.FunSuite {
-
 //  trait TestTrees1 {
 //    val huffman: HuffmanClass = HuffmanClass("adddddbbbbcccc")
 //  }
@@ -27,7 +26,6 @@ class HuffmanSuite extends munit.FunSuite {
 //      assertEquals(huffman.mainEncode(huffman.mainDecode(convertIntToByte(Vector(1,0,1,0,1,0,1,1,1)))), convertIntToByte(Vector(1,0,1,0,1,0,1,1,1)))
 //    }
 //  }
-
   test("test") {
     val huffman = HuffmanClass("abccddd")
     val tree = huffman.tree
@@ -37,4 +35,3 @@ class HuffmanSuite extends munit.FunSuite {
   }
 }
 
-object HuffmanSuite extends  HuffmanSuite
