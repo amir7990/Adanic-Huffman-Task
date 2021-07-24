@@ -2,13 +2,18 @@ package huffman
 
 import scala.annotation.tailrec
 
-abstract class CodeTree
-case class Fork(left: CodeTree, right: CodeTree, chars: Vector[Char], weight: Int) extends CodeTree
-case class Leaf(char: Char, weight: Int) extends CodeTree
-
-trait Huffman {
+class Huffman {
+  import CodeTree._
 
   type Bit = Byte
+
+  def calDepth(tree : CodeTree, res: Int, c: Char): Int = {
+    tree match {
+      case Leaf(_,_) => res
+      case Fork(left,_,_,_) if chars(left).contains(c) => calDepth(left, res+1, c)
+      case Fork(_,right,_,_) => calDepth(right, res+1, c)
+    }
+  }
 
   def weight(tree: CodeTree): Int = tree match {
     case Leaf(_, w) => w
@@ -27,19 +32,19 @@ trait Huffman {
 
   def times(chars: Vector[Char]): Vector[(Char, Int)] = {
     @tailrec
-    def iterator(ch: Vector[Char], v: Map[Char, Int]) : Map[Char, Int] = {
-     if (ch.isEmpty) {
-       v
+    def iterator(c: Vector[Char], frequency: Map[Char, Int]) : Map[Char, Int] = {
+     if (c.isEmpty) {
+       frequency
      } else {
-       val count = v.getOrElse(ch.head, 0) + 1
-       iterator(ch.tail, v + ((ch.head, count)))
+       val count = frequency.getOrElse(c.head, 0) + 1
+       iterator(c.tail, frequency + ((c.head, count)))
      }
     }
     iterator(chars, Map.empty).toVector
   }
 
-  def makeOrderedLeafVector(freq: Vector[(Char, Int)]): Vector[Leaf] =
-    freq.sortWith( _._2 < _._2).map(f => Leaf(f._1, f._2))
+  def makeOrderedLeafVector(freqs: Vector[(Char, Int)]): Vector[Leaf] =
+    freqs.sortWith( _._2 < _._2).map(f => Leaf(f._1, f._2))
 
   def singleton(trees: Vector[CodeTree]): Boolean =
     if (trees.size == 1) true else false
@@ -63,26 +68,66 @@ trait Huffman {
     until(singleton, combine)(makeOrderedLeafVector( times(chars) ) ).head
   }
 
-  def decode(tree: CodeTree, b: Vector[Bit]): Vector[Char] = {
-    def decode0(t: CodeTree, b: Vector[Bit]): Vector[Char] = t match {
-      case Leaf(char, _)  if b.isEmpty => Vector(char)
-      case Leaf(char, _) => char +: decode0(tree, b)
-      case Fork(left, _, _, _)  if b.head == 0.toByte => decode0(left, b.tail)
-      case Fork(_, right, _, _)  => decode0(right, b.tail)
+  def decoder(tree: CodeTree, bits: Int): Vector[Char] = {
+    def decodeOneLeaf(t: CodeTree, b: Int): Vector[Char] = t match {
+      case Leaf(char, _)  if b == 0 => Vector(char)
+      case Leaf(char, _) => char +: decodeOneLeaf(tree, b)
+      case Fork(left, _, _, _)  if b%2 == 1 => decodeOneLeaf(left, b/2)
+      case Fork(_, right, _, _)  => decodeOneLeaf(right, b/2)
     }
-    decode0(tree, b)
+    decodeOneLeaf(tree, bits)
   }
 
-  def convertIntToByte(vector: Vector[Int]): Vector[Bit] =
-    vector.map(a => a.toByte)
+  def convertIntToByte(ints: Vector[Int]): Vector[Bit] =
+    ints.map(a => a.toByte)
 
-  def encode(tree: CodeTree)(text: Vector[Char]): Vector[Bit] = {
-    def encode0(tree: CodeTree)(c: Char): Vector[Bit] = tree match {
-      case Leaf(_, _) => Vector.empty
-      case Fork(left, _, _, _) if chars(left).contains(c) => 0.toByte +: encode0(left)(c)
-      case Fork(_, right, _, _) => 1.toByte +: encode0(right)(c)
+  def convertByteToBit(bits: Vector[Bit], ints: Vector[Int]): Vector[Int] = {
+    def iterator(b: Vector[Bit], index: Int): Int = {
+      if (b.isEmpty) {
+        0
+      } else {
+        (b.head << index) | iterator(b.tail, index + 1)
+      }
     }
-    text flatMap encode0(tree)
+    if(bits.isEmpty){
+      ints
+    }
+    else{
+      if (bits.size >= 32 ){
+        val temp = bits.take(32)
+        val int = iterator(temp.reverse, 0)
+        convertByteToBit(bits.drop(32), ints:+int)
+      }else{
+        val temp = bits.take(bits.size)
+        val int = iterator(temp.reverse, 0)
+        convertByteToBit(bits.drop(bits.size), ints:+int)
+      }
+    }
+  }
+
+  def calcShiftSize(tree: CodeTree, chars: Vector[Char], res: Int): Int ={
+    chars.foldRight(0)((a,b)=>{
+      calDepth(tree, res, a)+b
+    })
+  }
+
+  def encoder(tree: CodeTree)(text: Vector[Char]): Int = {
+    def encodeOneChar(tree: CodeTree, index: Int)(c: Char): Int = {
+      tree match {
+        case Leaf(_, _) => 0
+        case Fork(_, right, _, _) if chars(right).contains(c) => 1 << index | encodeOneChar(right, index - 1)(c)
+        case Fork(left, _, _, _) => 0 << index | encodeOneChar(left, index - 1)(c)
+      }
+    }
+    @tailrec
+    def iterator(chars: Vector[Char], res: Int): Int= {
+      if (chars.isEmpty){
+        res
+      }else{
+        iterator(chars.tail, res|encodeOneChar(tree, calDepth(tree, 0, chars.head)-1)(chars.head)<<calcShiftSize(tree, chars.tail, 0))
+      }
+    }
+    iterator(text, 0)
   }
 }
 object Huffman extends Huffman
