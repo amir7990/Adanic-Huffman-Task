@@ -3,6 +3,7 @@ package huffman
 import Huffman._
 
 class HuffmanClass(chars: String) {
+  
   val tree: CodeTree = createCodeTree(chars.toVector)
 
   def mainDecode(bits: Int): String = {
@@ -13,7 +14,8 @@ class HuffmanClass(chars: String) {
     encoder(tree)(text.toVector)
 }
 
-object HuffmanClass{
+object HuffmanClass {
   def apply(chars: String): HuffmanClass = new HuffmanClass(chars)
 }
+
 

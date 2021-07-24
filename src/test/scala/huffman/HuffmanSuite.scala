@@ -1,7 +1,6 @@
 package huffman
 
 class HuffmanSuite extends munit.FunSuite {
-  import Huffman._
 
 //  trait TestTrees1 {
 //    val huffman: HuffmanClass = HuffmanClass("adddddbbbbcccc")
