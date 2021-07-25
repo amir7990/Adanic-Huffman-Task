@@ -1,6 +1,6 @@
 package huffman
 
-abstract class CodeTree
+sealed abstract class CodeTree
 
 
 object CodeTree extends CodeTree{

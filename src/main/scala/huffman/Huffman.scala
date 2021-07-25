@@ -68,13 +68,18 @@ class Huffman {
     until(singleton, combine)(makeOrderedLeafVector( times(chars) ) ).head
   }
 
-  def decoder(tree: CodeTree, bits: Int): Vector[Char] = {
-    def decodeOneLeaf(t: CodeTree, b: Int): Vector[Char] = t match {
-      case Leaf(char, _)  if b == 0 => Vector(char)
+  def makeDiffer(shiftSize: Int): Int = 1 << shiftSize-1
+
+  def decoder(tree: CodeTree, bits: (Int, Int)): Vector[Char] = {
+    def decodeOneLeaf(t: CodeTree, b: (Int, Int)): Vector[Char] = {
+      t match {
+      case Leaf(char, _)  if b._2 == 0 => Vector(char)
       case Leaf(char, _) => char +: decodeOneLeaf(tree, b)
-      case Fork(left, _, _, _)  if b%2 == 1 => decodeOneLeaf(left, b/2)
-      case Fork(_, right, _, _)  => decodeOneLeaf(right, b/2)
+      case Fork(_, right, _, _)  if (b._1 & makeDiffer(b._2)) == makeDiffer(b._2) => decodeOneLeaf(right, (b._1, b._2-1))
+      case Fork(left, _, _, _)  => decodeOneLeaf(left, (b._1, b._2-1))
+      }
     }
+
     decodeOneLeaf(tree, bits)
   }
 
@@ -111,8 +116,8 @@ class Huffman {
     })
   }
 
-  def encoder(tree: CodeTree)(text: Vector[Char]): Int = {
-    def encodeOneChar(tree: CodeTree, index: Int)(c: Char): Int = {
+  def encoder(tree: CodeTree)(text: Vector[Char]): (Int, Int) = {
+    def encodeOneChar(tree: CodeTree, index: Int)(c: Char): Int= {
       tree match {
         case Leaf(_, _) => 0
         case Fork(_, right, _, _) if chars(right).contains(c) => 1 << index | encodeOneChar(right, index - 1)(c)
@@ -120,14 +125,16 @@ class Huffman {
       }
     }
     @tailrec
-    def iterator(chars: Vector[Char], res: Int): Int= {
+    def iterator(chars: Vector[Char], res: Int, beatCount: Int): (Int, Int)= {
       if (chars.isEmpty){
-        res
+        (res, beatCount)
       }else{
-        iterator(chars.tail, res|encodeOneChar(tree, calDepth(tree, 0, chars.head)-1)(chars.head)<<calcShiftSize(tree, chars.tail, 0))
+        val shiftSize = calcShiftSize(tree, chars.tail, 0)
+        val depth = calDepth(tree, 0, chars.head)
+        iterator(chars.tail, res|encodeOneChar(tree, depth-1)(chars.head)<<shiftSize, beatCount+depth)
       }
     }
-    iterator(text, 0)
+    iterator(text, 0, 0)
   }
 }
 object Huffman extends Huffman

@@ -6,11 +6,11 @@ class HuffmanClass(chars: String) {
   
   val tree: CodeTree = createCodeTree(chars.toVector)
 
-  def mainDecode(bits: Int): String = {
+  def mainDecode(bits: (Int, Int)): String = {
     decoder(tree, bits).mkString
   }
 
-  def mainEncode(text: String): Int =
+  def mainEncode(text: String): (Int, Int) =
     encoder(tree)(text.toVector)
 }
 
